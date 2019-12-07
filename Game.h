@@ -5,19 +5,28 @@
 #ifndef RTOS_MASTERMIND_GAME_H
 #define RTOS_MASTERMIND_GAME_H
 
+#include <limits.h>
+#include <vector>
+
+#include "GameMaster.h"
+#include "Player.h"
+
+using namespace std;
 using nat = unsigned;
 
-
 class Game {
-    private GameMaster gameMaster;
-    private Player player;
-    private nat* previousGuesses;
-    private nat rounds;
+private :
+    GameMaster gameMaster;
+    Player player;
+    nat rounds;
+    vector<nat*> previousGuesses;
 
-    public Game(nat colors, nat positions);
-    public Game(nat colors, nat positions, nat rounds)
+public:
+    Game() = default;
+    Game(nat colors, nat positions);
+    Game(nat colors, nat positions, nat rounds);
 
-    private bool isFinished();
+    bool isFinished();
 };
 
 
