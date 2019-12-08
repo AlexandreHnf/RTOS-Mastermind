@@ -4,11 +4,11 @@
 
 #include "Game.h"
 
-Game::Game(nat colors, nat positions) {
+Game::Game(unsigned colors, unsigned positions) {
     Game(colors, positions, UINT_MAX);
 }
 
-Game::Game(nat colors, nat positions, nat rounds) {
+Game::Game(unsigned colors, unsigned positions, unsigned rounds) {
     this->positions = positions;
     this->gameMaster = GameMaster(colors, positions);
     this->player = Player(colors, positions);
@@ -16,12 +16,12 @@ Game::Game(nat colors, nat positions, nat rounds) {
 }
 
 bool Game::isFinished() {
-    nat* solution = this->gameMaster.getSolution();
-    nat* proposal = this->previousGuesses[this->previousGuesses.size() - 1];
+    unsigned* solution = this->gameMaster.getSolution();
+    unsigned* proposal = this->previousGuesses[this->previousGuesses.size() - 1];
 
     bool identical = true;
 
-    for (nat i = 0; i < this->positions; i++)
+    for (unsigned i = 0; i < this->positions; i++)
         if (proposal[i] != solution[i])
             identical = false;
 
