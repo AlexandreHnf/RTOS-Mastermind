@@ -4,7 +4,7 @@ import random
 import time
 import sys
 
-# Arguments : COLORS SPOTS NB_NODES [PRINT]
+# Arguments : COLORS SPOTS NB_FIXED_NODES [PRINT]
 COLORS = int(sys.argv[1])
 SPOTS = int(sys.argv[2])
 NB_FIXED_SPOTS = int(sys.argv[3])  # = fixed spots
@@ -25,11 +25,12 @@ class Node(Thread):
 		self.new_guess = None
 
 	def run(self):
+		print(self.id)
 		combis = product(range(COLORS), repeat=(SPOTS-NB_FIXED_SPOTS))
 		for combi in combis:
 			combi = self.fixed_spots + combi # (0, 1) + (2, 3, 4) = (0, 1, 2, 3, 4)
 			if plausible(combi, self.prev_guesses, self.prev_scores):
-				print("Plausible guess :", combi)
+				# print("Plausible guess :", combi)
 				self.new_guess = combi
 				return  # Don't go any further
 			# else:
@@ -81,9 +82,9 @@ def masterNode():
 
 	prev_guesses = []
 	prev_scores = []
-	for i in range(NB_NODES):
-		prev_guesses.append([])
-		prev_scores.append([])
+	# for i in range(NB_NODES):
+	# 	prev_guesses.append([])
+	# 	prev_scores.append([])
 	
 	solutionFound = None
 	finished = False
@@ -93,8 +94,10 @@ def masterNode():
 		j = 0
 		for fixed_spot in fixed_spots:
 			node = Node(j, fixed_spot)
-			node.prev_guesses = prev_guesses[j]
-			node.prev_scores = prev_scores[j]
+			# node.prev_guesses = prev_guesses[j]
+			# node.prev_scores = prev_scores[j]
+			node.prev_guesses = prev_guesses
+			node.prev_scores = prev_scores
 			nodes.append(node)
 			j += 1
 		
@@ -104,16 +107,28 @@ def masterNode():
 		for i in range(NB_NODES):
 			nodes[i].join()
 		
-		for i in range(NB_NODES):
-			guess = nodes[i].new_guess
-			if guess == None: continue
-			result = score(guess, secret)
-			prev_guesses[i].append(guess)
-			prev_scores[i].append(result)
-			if guess == secret:
-				finished = True
-				solutionFound = guess
-				break
+		# for i in range(NB_NODES):
+		# 	guess = nodes[i].new_guess
+		# 	if guess == None: continue
+		# 	result = score(guess, secret)
+		# 	prev_guesses[i].append(guess)
+		# 	prev_scores[i].append(result)
+		# 	if guess == secret:
+		# 		finished = True
+		# 		solutionFound = guess
+		# 		break
+		node = nodes[random.randint(0, NB_NODES-1)]
+		while node.new_guess == None :
+			node = nodes[random.randint(0, NB_NODES-1)]
+
+		result = score(node.new_guess, secret)
+		prev_guesses.append(node.new_guess)
+		prev_scores.append(result)
+
+		if node.new_guess == secret:
+			finished = True
+			solutionFound = node.new_guess
+
 	
 	print("Found :", solutionFound)
 	
@@ -130,43 +145,3 @@ if __name__ == "__main__":
 	except KeyboardInterrupt:   # Handle CTRL-C
 		exitApp = True
 		print("STOP")
-
-"""
-Node:
-	prev_guests  = [ (guess), (guess2) ,...  ]
-	prev_scoress  = [ (score), (score2) ,...  ]
-
-	combis = product(range(colors), spots-NB_NODES) #diff thread (fix NBNODES first positions)
-	for combi in combis:
-		flag = True
-		for i in range(len(prev_scoress)):
-			if score(prev_guest[i], combi) == prev_scores[i]:
-				flag = False
-				break
-		if flag:
-			return combi #return au master
-
-Master:
-	prev_guest = []
-	prev_scores = []
-	nodes = []
-	
-	solution found= False
-	make random init guess
-	while not solution found:
-		for node in nodes:
-			node.set prev_scores
-			node.set prev_guests 
-			node.setFixedBegin(begin)
-		
-		for node in nodes:
-			node.start()
-		for node in nodes:
-			node.join()
-
-		evaluate nodes guesses
-		if sol found :
-			solution found = True
-		
-	print( "YAS QUEEN SLAY BITCH FDP")
-"""
