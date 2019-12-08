@@ -12,19 +12,21 @@
 #include "Player.h"
 
 using namespace std;
+using nat = unsigned;
 
 class Game {
 private :
-    unsigned positions;
+    nat positions;
     GameMaster gameMaster;
     Player player;
-    unsigned rounds;
-    vector<unsigned*> previousGuesses;
+    nat rounds;
+    vector<nat*> previousGuesses;
+    vector<nat*> previousEvaluations;
 
 public:
     Game() = default;
-    Game(unsigned colors, unsigned positions);
-    Game(unsigned colors, unsigned positions, unsigned rounds);
+    Game(nat colors, nat positions);
+    Game(nat colors, nat positions, nat rounds);
 
     bool isFinished();
     void playRound();

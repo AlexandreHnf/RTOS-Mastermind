@@ -2,11 +2,11 @@
 #include "mpi.h"
 #include "Game.h"
 #include <vector>
-#include <math.h>
 #include <iostream>
 #include "Mastermind.h"
 
 using namespace std;
+using nat unsigned;
 
 int COLORS;
 int SPOTS;
@@ -24,9 +24,8 @@ int main( int argc, char **argv) {
 	int rank; // process ID
 	int size; // nb of instances
 
-	MPI_Status status; // for the send, recv
-
-	MPI_Init( &argc, &argv ); 				// init the MPI environment
+	MPI_Status status;
+	MPI_Init( &argc, &argv ); // init the MPI environment
 	MPI_Comm_rank( MPI_COMM_WORLD, &rank ); // ID
 	MPI_Comm_size( MPI_COMM_WORLD, &size ); // nb of instances
 
@@ -42,7 +41,9 @@ int main( int argc, char **argv) {
 
 	std::vector<unsigned> newGuess; 		// (1, 2, 3)
 	
-	// do {
+	bool finished = false;
+	
+	do {
 		if (rank == 0) { // master node 
 			cout << "I'm the master " << endl;
 			GameMaster gameMaster = GameMaster(6, 4);
@@ -69,6 +70,7 @@ int main( int argc, char **argv) {
 				// rand_i = rand() % NB_NODES; 
 			// }
 
+			// => recv all guesses from all nodes (blocking recv)
 			// assess them
 			// unsigned* evaluation = gameMaster.checkProposedSol(currentGuesses.get(i))
 
@@ -102,6 +104,8 @@ int main( int argc, char **argv) {
 			// 		# print("Plausible guess :", combi)
 			// 		new_guess = combi
 
+			// => recv the guesses list 
+			// compute all combinations and pick one plausible guess
 			// gatter to master node
 			//  MPI_Gather(&sendbuf,sendcnt,sendtype,&recvbuf,recvcount,recvtype,root,comm)
 			// newGuessSize = newGuess.size();
@@ -113,7 +117,7 @@ int main( int argc, char **argv) {
 			MPI_Gather(&[newGuess[0], SPOTS, MPI_INT, currentGuesses, NB_NODES, MPI_INT, 0, MPI_COMM_WORLD);
 		}
 
-	// } while (not finished);
+	} while (not finished);
 
 	MPI_Finalize();
 	return 0;
