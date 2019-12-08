@@ -47,3 +47,7 @@ void GameMaster::printSolution() {
 
     cout << endl;
 }
+
+nat* GameMaster::getSolution() const {
+    return solution;
+}

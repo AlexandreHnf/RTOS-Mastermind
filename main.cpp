@@ -19,4 +19,9 @@ int main() {
     nat* res = gameMaster.checkProposedSol(test);
 
     cout << "Perfect: " << res[0] << ", correct colors: " << res[1] << endl;
+
+    /*
+     * while not game is finished :
+     *   game -> play round()
+     */
 }

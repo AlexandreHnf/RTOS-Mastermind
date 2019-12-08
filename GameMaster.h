@@ -28,6 +28,8 @@ public:
     nat* checkProposedSol(nat* proposedSolution);
 
     void printSolution();
+
+    nat* getSolution() const;
 };
 
 
