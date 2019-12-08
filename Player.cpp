@@ -28,7 +28,6 @@ nat *Player::pickFirstSolution() {
 
 bool Player::plausibleSolution(const vector<nat*> *previousGuesses, const vector<nat*> *previousEvaluations, nat *solution) {
     for (nat i = 0; i < previousGuesses->size(); i++) {
-        cout << "History eval: " << i << endl;
         if (!proposalIsDifferent(solution, previousGuesses->at(i))) return false;
 
         if (!proposalRespectsKnowledge(solution, previousGuesses->at(i), previousEvaluations->at(i))) return false;
