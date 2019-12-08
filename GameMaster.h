@@ -10,26 +10,26 @@
 #include <iostream>
 
 using namespace std;
-using nat = unsigned; // shorter name for natural numbers
+// #define unsigned unsigned int // shorter name for unsignedural numbers
 
 
 class GameMaster {
 
 private:
-    nat colors;
-    nat positions;
-    nat* solution;
+    unsigned colors;
+    unsigned positions;
+    unsigned* solution;
 
 public:
     GameMaster() = default;
-    GameMaster(nat colors, nat positions);
+    GameMaster(unsigned colors, unsigned positions);
 
     // returns an array of length 2: 0 -> # perfect colors, 1 -> # correct colors
-    nat* checkProposedSol(nat* proposedSolution);
+    unsigned* checkProposedSol(unsigned* proposedSolution);
 
     void printSolution();
 
-    nat* getSolution() const;
+    unsigned* getSolution() const;
 };
 
 

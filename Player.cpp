@@ -4,30 +4,30 @@
 
 #include "Player.h"
 
-Player::Player(nat colors, nat positions) {
+Player::Player(unsigned colors, unsigned positions) {
     this->colors = colors;
     this->positions = positions;
 }
 
-vector<nat *> Player::analyzeContext(vector<nat *> previousPropositions) {
-    return vector<nat *>();
+vector<unsigned *> Player::analyzeContext(vector<unsigned *> previousPropositions) {
+    return vector<unsigned *>();
 }
 
-nat *Player::pickSolution() {
+unsigned *Player::pickSolution() {
     return nullptr;
 }
 
-nat *Player::pickFirstSolution() {
-    nat* solution = new nat[positions];
+unsigned *Player::pickFirstSolution() {
+    unsigned* solution = new unsigned[positions];
 
-    for (nat i = 0; i < positions; i++)
+    for (unsigned i = 0; i < positions; i++)
         solution[i] = random() % this->positions;
 
     return solution;
 }
 
-bool Player::plausibleSolution(const vector<nat*> *previousGuesses, const vector<nat*> *previousEvaluations, nat *solution) {
-    for (nat i = 0; i < previousGuesses->size(); i++) {
+bool Player::plausibleSolution(const vector<unsigned*> *previousGuesses, const vector<unsigned*> *previousEvaluations, unsigned *solution) {
+    for (unsigned i = 0; i < previousGuesses->size(); i++) {
         cout << "History eval: " << i << endl;
         if (!proposalIsDifferent(solution, previousGuesses->at(i))) return false;
 
@@ -37,23 +37,23 @@ bool Player::plausibleSolution(const vector<nat*> *previousGuesses, const vector
     return true;
 }
 
-bool Player::proposalIsDifferent(const nat *proposal, const nat *reference) {
-    for (nat i = 0; i < this->positions; i++)
+bool Player::proposalIsDifferent(const unsigned *proposal, const unsigned *reference) {
+    for (unsigned i = 0; i < this->positions; i++)
         if (proposal[i] != reference[i])
             return true;
 
     return false;
 }
 
-bool Player::proposalRespectsKnowledge(const nat* proposal, const nat* reference, const nat* referenceScore) {
-    nat* referenceCopy = new nat[this->positions];
-    for (nat i = 0; i < this->positions; i++)
+bool Player::proposalRespectsKnowledge(const unsigned* proposal, const unsigned* reference, const unsigned* referenceScore) {
+    unsigned* referenceCopy = new unsigned[this->positions];
+    for (unsigned i = 0; i < this->positions; i++)
         referenceCopy[i] = reference[i];
 
-    nat conservedColors = 0;
+    unsigned conservedColors = 0;
 
-    for (nat i = 0; i < this->positions; i++) {
-        for (nat j = 0; j < this->positions; j++) {
+    for (unsigned i = 0; i < this->positions; i++) {
+        for (unsigned j = 0; j < this->positions; j++) {
             if (proposal[i] == referenceCopy[j]) {
                 referenceCopy[j] = this->positions;
                 conservedColors++;
@@ -62,7 +62,7 @@ bool Player::proposalRespectsKnowledge(const nat* proposal, const nat* reference
         }
     }
 
-    nat correctColors = referenceScore[0] + referenceScore[1];
+    unsigned correctColors = referenceScore[0] + referenceScore[1];
 
     if (conservedColors < correctColors && correctColors == this->positions) return false;
 
