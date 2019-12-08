@@ -78,7 +78,7 @@ int main( int argc, char **argv) {
 			MPI_Bcast(&prevGuesses[0], prevGuessesSize, MPI_INT , 0, MPI_COMM_WORLD);
 
 			for (auto prevGuess : prevGuesses){
-				printf("val : %d", prevGuess);
+				cout << prevGuess << endl;
 			}
 
 			// compute all combiunsignedions and pick one plausible guess
