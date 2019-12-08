@@ -16,6 +16,7 @@ using nat = unsigned;
 
 class Game {
 private :
+    nat positions;
     GameMaster gameMaster;
     Player player;
     nat rounds;
@@ -27,6 +28,7 @@ public:
     Game(nat colors, nat positions, nat rounds);
 
     bool isFinished();
+    void playRound();
 };
 
 

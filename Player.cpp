@@ -25,3 +25,24 @@ nat *Player::pickFirstSolution() {
 
     return solution;
 }
+
+bool Player::plausibleSolution(const vector<nat*> *previousGuesses, const vector<nat*> *previousEvaluations, nat *solution) {
+    for (nat i = 0; i < previousGuesses->size(); i++) {
+        if (!proposalIsDifferent(solution, previousGuesses->at(i))) return false;
+
+    }
+
+    return true;
+}
+
+bool Player::proposalIsDifferent(const nat *proposal, const nat *reference) {
+    for (nat i = 0; i < this->positions; i++)
+        if (proposal[i] != reference[i])
+            return true;
+
+    return false;
+}
+
+bool Player::proposalRespectsKnowledge(const nat* proposal, const nat* reference, const nat* referenceScore) {
+    return false;
+}
