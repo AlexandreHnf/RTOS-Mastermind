@@ -53,8 +53,6 @@ int main( int argc, char **argv) {
 
 	} while (not finished);
 
-
-
 	MPI_Finalize();
 	return 0;
 }
