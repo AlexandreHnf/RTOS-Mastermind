@@ -28,8 +28,10 @@ nat *Player::pickFirstSolution() {
 
 bool Player::plausibleSolution(const vector<nat*> *previousGuesses, const vector<nat*> *previousEvaluations, nat *solution) {
     for (nat i = 0; i < previousGuesses->size(); i++) {
+        cout << "History eval: " << i << endl;
         if (!proposalIsDifferent(solution, previousGuesses->at(i))) return false;
 
+        if (!proposalRespectsKnowledge(solution, previousGuesses->at(i), previousEvaluations->at(i))) return false;
     }
 
     return true;
@@ -44,5 +46,29 @@ bool Player::proposalIsDifferent(const nat *proposal, const nat *reference) {
 }
 
 bool Player::proposalRespectsKnowledge(const nat* proposal, const nat* reference, const nat* referenceScore) {
-    return false;
+    nat* referenceCopy = new nat[this->positions];
+    for (nat i = 0; i < this->positions; i++)
+        referenceCopy[i] = reference[i];
+
+    nat conservedColors = 0;
+
+    for (nat i = 0; i < this->positions; i++) {
+        for (nat j = 0; j < this->positions; j++) {
+            if (proposal[i] == referenceCopy[j]) {
+                referenceCopy[j] = this->positions;
+                conservedColors++;
+                break;
+            }
+        }
+    }
+
+    nat correctColors = referenceScore[0] + referenceScore[1];
+
+    if (conservedColors < correctColors && correctColors == this->positions) return false;
+
+    if (conservedColors <= correctColors && correctColors != this->positions) return false;
+
+    if (conservedColors == this->positions && correctColors == 0) return false;
+
+    return true;
 }
