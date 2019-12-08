@@ -21,6 +21,7 @@ private :
     Player player;
     nat rounds;
     vector<nat*> previousGuesses;
+    vector<nat*> previousEvaluations;
 
 public:
     Game() = default;
