@@ -69,7 +69,7 @@ int main( int argc, char **argv) {
 			}
 			// combis = product(range(COLORS), repeat=SPOTS)
 			// send to each node its corresponding fixed begin
-			vg fixedSpots = gameMaster.generateFirstPositions();
+			// vg fixedSpots = gameMaster.generateFirstPositions();
 
 			// vg fixedSpot;
 			// for (int i = 0; i < NB_NODES; i++){

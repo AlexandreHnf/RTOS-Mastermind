@@ -9,24 +9,7 @@ Player::Player(nat colors, nat positions) {
     this->positions = positions;
 }
 
-vector<nat *> Player::analyzeContext(vector<nat *> previousPropositions) {
-    return vector<nat *>();
-}
-
-nat *Player::pickSolution() {
-    return nullptr;
-}
-
-nat *Player::pickFirstSolution() {
-    nat* solution = new nat[positions];
-
-    for (nat i = 0; i < positions; i++)
-        solution[i] = random() % this->positions;
-
-    return solution;
-}
-
-bool Player::plausibleSolution(const vector<nat*> *previousGuesses, const vector<nat*> *previousEvaluations, const nat *solution, nat solLen) const {
+bool Player::plausibleSolution(const vg* previousGuesses, const vg* previousEvaluations, sg solution, nat solLen) const {
     for (nat i = 0; i < previousGuesses->size(); i++) {
         if (!proposalIsDifferent(solution, solLen, previousGuesses->at(i))) return false;
 
@@ -36,24 +19,24 @@ bool Player::plausibleSolution(const vector<nat*> *previousGuesses, const vector
     return true;
 }
 
-bool Player::proposalIsDifferent(const nat *proposal, nat proposalLen, const nat *reference) const {
+bool Player::proposalIsDifferent(sg proposal, nat proposalLen, sg reference) const {
     if (proposalLen < this->positions) return true;
     for (nat i = 0; i < this->positions; i++)
-        if (proposal[i] != reference[i])
+        if (proposal.at(i) != reference.at(i))
             return true;
 
     return false;
 }
 
-bool Player::proposalRespectsKnowledge(const nat* proposal, nat proposalLen, const nat* reference, const nat* referenceScore) const {
-    bool* referenceNotTaken = new bool[this->positions];
-    for (nat i = 0; i < this->positions; i++)
+bool Player::proposalRespectsKnowledge(sg proposal, nat proposalLen, sg reference, sg referenceScore) const {
+    bool* referenceNotTaken = new bool[reference.size()];
+    for (nat i = 0; i < reference.size(); i++)
         referenceNotTaken[i] = true;
 
     nat conservedColors = 0;
 
     for (nat i = 0; i < proposalLen; i++) {
-        for (nat j = 0; j < this->positions; j++) {
+        for (nat j = 0; j < reference.size(); j++) {
             if (proposal[i] == reference[j] && referenceNotTaken[j]) {
                 referenceNotTaken[j] = false;
                 conservedColors++;
@@ -66,7 +49,7 @@ bool Player::proposalRespectsKnowledge(const nat* proposal, nat proposalLen, con
 
     nat correctColors = referenceScore[0] + referenceScore[1];
 
-    nat wrongColors = this->positions - correctColors;
+    nat wrongColors = reference.size() - correctColors;
 
     //if (conservedColors < correctColors && correctColors == this->positions) return false;
     if (changedColors > wrongColors && wrongColors == 0) return false;
@@ -75,33 +58,41 @@ bool Player::proposalRespectsKnowledge(const nat* proposal, nat proposalLen, con
     if (changedColors >= wrongColors && wrongColors != 0) return false;
 
     //if (conservedColors == this->positions && correctColors == 0) return false;
-    if (changedColors == 0 && wrongColors == this->positions) return false;
+    if (changedColors == 0 && wrongColors == reference.size()) return false;
 
     return true;
 }
 
-nat *Player::generatePlausibleSolution(nat fixedPositions, const nat *posList, const vector<nat*> *previousGuesses, const vector<nat*> *previousEvaluations) {
-    nat* proposal = new nat[this->positions];
+sg Player::generatePlausibleSolution(sg posList, const vg* previousGuesses, const vg* previousEvaluations) {
+    sg proposal;
 
-    for (nat i = 0; i < fixedPositions; i++)
-        proposal[i] = posList[i];
+    for (nat i = 0; i < posList.size(); i++)
+        proposal.push_back(posList[i]);
+    for (nat i = posList.size(); i < this->positions; i++)
+        proposal.push_back(this->colors);
 
-    generatePosition(proposal, fixedPositions, previousGuesses, previousEvaluations);
+    bool found = false;
+    generatePosition(&proposal, posList.size(), previousGuesses, previousEvaluations, &found);
+
+    if (!found)
+        for (nat i = 0; i < this->positions; i++)
+            proposal[i] = this->colors;
+
+    return proposal;
 }
 
-void Player::generatePosition(nat *proposal, nat position, const vector<nat*> *previousGuesses, const vector<nat*> *previousEvaluations) {
-    if (plausibleSolution(previousGuesses, previousEvaluations, proposal, position)) {
+void Player::generatePosition(sg* proposal, nat position, const vg* previousGuesses, const vg* previousEvaluations, bool* found) {
+    if (!*found && plausibleSolution(previousGuesses, previousEvaluations, *proposal, position)) {
         for (nat i = 0; i < this->colors; i++) {
-            proposal[position] = i;
-            if (position == this->positions - 1) {
-                // check if the solution is viable here
-                if (plausibleSolution(previousGuesses, previousEvaluations, proposal, position + 1)) {
-                    for (int i = 0; i < this->positions; i++)
-                        cout << proposal[i] << " ";
-                    cout << endl;
-                    return;
-                }
-            } else generatePosition(proposal, position + 1, previousGuesses, previousEvaluations);
+            if (!*found) {
+                proposal->at(position) = i;
+                if (position == proposal->size() - 1) {
+                    // check if the solution is viable here
+                    if (plausibleSolution(previousGuesses, previousEvaluations, *proposal, position + 1)) {
+                        *found = true;
+                    }
+                } else generatePosition(proposal, position + 1, previousGuesses, previousEvaluations, found);
+            }
         }
     }
 }
