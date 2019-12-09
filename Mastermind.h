@@ -7,7 +7,16 @@
 
 #define vg std::vector<std::vector<unsigned>> //vg = vector fo guesses : [ (g1), (g2)] where g1 = [0, 1, 2]
 
-void broadcastSend(vg vec, int subListSize);
-vg broadcastRecvVecOfVec(int subListSize);
+void broadcastSendVecVec(vg, int);
+vg broadcastRecvVecOfVec(int);
 
-void print(vg vec);
+void broadcastSend(std::vector<unsigned>);
+std::vector<unsigned> broadcastRecv();
+
+void sendFixedSpots(vg);
+std::vector<unsigned> recvFixedSpots(MPI_Status);
+
+bool victory(std::vector<unsigned>);
+
+void print(vg);
+void print(std::vector<unsigned>);

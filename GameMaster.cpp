@@ -1,7 +1,3 @@
-//
-// Created by Madalin Ionescu on 2019-12-07.
-//
-
 #include "GameMaster.h"
 
 GameMaster::GameMaster(unsigned colors, unsigned positions) {
@@ -51,3 +47,12 @@ void GameMaster::printSolution() {
 unsigned* GameMaster::getSolution() const {
     return solution;
 }
+
+// bool GameMaster::victory(std::vector<unsigned> guess) {
+// 	for (int i = 0; i < this->positions; i++) {
+// 		if (guess.at(i) != this->solution.at(i)) {
+// 			return false;
+// 		}
+// 	}
+// 	return true;
+// }

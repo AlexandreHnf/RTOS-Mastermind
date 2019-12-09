@@ -27,6 +27,8 @@ public:
     // returns an array of length 2: 0 -> # perfect colors, 1 -> # correct colors
     unsigned* checkProposedSol(unsigned* proposedSolution);
 
+	// bool victory(std::vector<unsigned>);
+
     void printSolution();
 
     unsigned* getSolution() const;
