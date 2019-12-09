@@ -51,3 +51,29 @@ void GameMaster::printSolution() {
 unsigned* GameMaster::getSolution() const {
     return solution;
 }
+
+vg GameMaster::generateFirstPositions(unsigned short posNb) {
+    sg working;
+    vg beginnings;
+    int colors = 4;
+
+    for (int i = 0; i < posNb; i++)
+        working.push_back(0);
+
+    cartProduct(&working, &beginnings, 0, posNb, colors);
+
+    return beginnings;
+}
+
+void GameMaster::cartProduct(sg *v, vg *vv, int position, int length, int colors) {
+    int i;
+    for (i = 0; i < colors; i++) {
+        v->at(position) = i;
+        if (position == length - 1) {
+            vv->push_back(*v);
+        }
+        else cartProduct(v, vv, position + 1, length, colors);
+    }
+}
+
+

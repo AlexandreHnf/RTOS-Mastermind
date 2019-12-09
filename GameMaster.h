@@ -8,9 +8,11 @@
 #include <cstdlib>
 #include <ctime>
 #include <iostream>
+#include <vector>
 
 using namespace std;
-// #define unsigned unsigned int // shorter name for unsignedural numbers
+using vg = vector<vector<unsigned>>;
+using sg = vector<unsigned>;
 
 
 class GameMaster {
@@ -19,6 +21,8 @@ private:
     unsigned colors;
     unsigned positions;
     unsigned* solution;
+
+    void cartProduct(sg* v, vg* vv, int position, int length, int colors);
 
 public:
     GameMaster() = default;
@@ -30,6 +34,8 @@ public:
     void printSolution();
 
     unsigned* getSolution() const;
+
+    vg generateFirstPositions(unsigned short posNb);
 };
 
 
