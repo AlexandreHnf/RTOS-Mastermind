@@ -69,14 +69,16 @@ int main( int argc, char **argv) {
 			}
 			// combis = product(range(COLORS), repeat=SPOTS)
 			// send to each node its corresponding fixed begin
-			vg fixedSpot;
-			for (int i = 0; i < NB_NODES; i++){
-				std::vector<unsigned> fixed;
-				for (int j = 0; j < NB_FIXED_SPOTS; j++){
-					fixed.push_back(j);
-				}
-				fixedSpot.push_back(fixed);
-			}
+			vg fixedSpots = gameMaster.generateFirstPositions();
+
+			// vg fixedSpot;
+			// for (int i = 0; i < NB_NODES; i++){
+			// 	std::vector<unsigned> fixed;
+			// 	for (int j = 0; j < NB_FIXED_SPOTS; j++){
+			// 		fixed.push_back(j);
+			// 	}
+			// 	fixedSpot.push_back(fixed);
+			// }
 			sendFixedSpots(fixedSpot);
 			
 			// ====== send prev guesses and prev scores to all nodes
