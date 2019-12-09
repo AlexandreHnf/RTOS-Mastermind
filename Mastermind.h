@@ -7,7 +7,7 @@
 
 #define vg std::vector<std::vector<unsigned>> //vg = vector fo guesses : [ (g1), (g2)] where g1 = [0, 1, 2]
 
-void broadcastSend(std::vector<std::vector<unsigned>> vec, unsigned vecSize);
-vg broadcastRecvVecOfVec();
+void broadcastSend(std::vector<unsigned> vec);
+std::vector<unsigned> broadcastRecvVecOfVec();
 
-void print(std::vector<std::vector<unsigned>> vec);
+void print(std::vector<unsigned> vec);
