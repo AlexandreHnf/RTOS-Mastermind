@@ -9,9 +9,12 @@ using namespace std;
 
 int COLORS;
 int SPOTS;
+int EVALS = 2; // black pins and white pins
 int NB_FIXED_SPOTS;
 int NB_COMBIS;
 int MASTER = 0;
+int NONE = 0;
+GameMaster gameMaster;
 
 int main( int argc, char **argv) {
 	COLORS = 10;			// Read arguments
@@ -29,7 +32,7 @@ int main( int argc, char **argv) {
 
 	bool finished = false;
 	vg prevGuesses;
-	// std::vector<unsigned> prevScores;
+	vg prevScores;
 
 	int *currentGuesses;
 	
@@ -43,23 +46,24 @@ int main( int argc, char **argv) {
 			cout << "======= MASTER ======= " << endl;
 			if (round == 0) {
 				// ==== INITIALISATION FOR THE MASTER ====
-				GameMaster gameMaster = GameMaster(6, 4);
+				gameMaster = GameMaster(6, 4);
 				gameMaster.printSolution();
 
 				// combis = product(range(COLORS), repeat=SPOTS)
 
 				for (int i = 0; i < 5; i++){
-					std::vector<unsigned> lol;
-					for (int j = 0; j < SPOTS; j++){
-						lol.push_back(j);
-					}
-					prevGuesses.push_back(lol);
+					std::vector<unsigned> guess;
+					std::vector<unsigned> score;
+					for (int j = 0; j < SPOTS; j++) { guess.push_back(j); }					
+					for (int k = 0; k < EVALS; k++) {score.push_back(2); }
+					prevGuesses.push_back(guess);
+					prevScores.push_back(score);
 				}
 			}
 
-			// ====== send prev guesses to all nodes
-			broadcastSend(prevGuesses); 
-			// MPI_Barrier(MPI_COMM_WORLD); // allow other nodes to use that guesses
+			// ====== send prev guesses and prev scores to all nodes
+			// broadcastSend(prevGuesses, SPOTS); 
+			broadcastSend(prevScores, EVALS);
 			cout << "The master have sent prev guesses to all nodes" << endl;
 
 
@@ -101,16 +105,17 @@ int main( int argc, char **argv) {
 		else { 
 			cout << "======= SLAVE n°" << ID  << " =======" << endl;
 
-			// MPI_Barrier(MPI_COMM_WORLD);
-			prevGuesses = broadcastRecvVecOfVec();
-			print(prevGuesses);
+			// prevGuesses = broadcastRecvVecOfVec(SPOTS);
+			prevScores = broadcastRecvVecOfVec(EVALS);
+			// print(prevGuesses);
+			print(prevScores);
 
 
 			// compute all combiunsignedions and pick one plausible guess
 			// todo : replace it by combinations 
 			std::vector<unsigned> newGuess;
 			for (int i=0; i<SPOTS; i++) {
-				if (ID == 2) {newGuess.push_back(NULL);} // NULL is 0 in c++
+				if (ID == 2) {newGuess.push_back(NONE);} // NULL is 0 in c++
 				else {newGuess.push_back(ID);}
 			}
 			
@@ -137,23 +142,23 @@ int main( int argc, char **argv) {
 	return 0;
 }
 
-void broadcastSend(vg vec){
+void broadcastSend(vg vec, int subListSize){
 	int vecSize = vec.size();
 	MPI_Bcast(&vecSize, 1, MPI_INT , 0, MPI_COMM_WORLD);
 	for (int i = 0; i < vecSize; i++){
-		MPI_Bcast(&vec[i][0], SPOTS, MPI_INT , 0, MPI_COMM_WORLD);
+		MPI_Bcast(&vec[i][0], subListSize, MPI_INT , 0, MPI_COMM_WORLD);
 	}
 }
 
 
-vg broadcastRecvVecOfVec(){
+vg broadcastRecvVecOfVec(int subListSize){
 	vg vec;
 	int vecSize;
 	MPI_Bcast(&vecSize, 1, MPI_INT , 0, MPI_COMM_WORLD);
 	vec.resize(vecSize);
 	for (int i = 0; i < vecSize; i++){
-		vec[i].resize(SPOTS);
-		MPI_Bcast(&vec[i][0], SPOTS, MPI_INT , 0, MPI_COMM_WORLD);
+		vec[i].resize(subListSize);
+		MPI_Bcast(&vec[i][0], subListSize, MPI_INT , 0, MPI_COMM_WORLD);
 	}
 	return vec;
 }
