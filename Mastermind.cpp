@@ -28,12 +28,11 @@ int main( int argc, char **argv) {
 	MPI_Comm_size( MPI_COMM_WORLD, &NB_NODES ); // nb of instances
 
 	bool finished = false;
-	std::vector<unsigned> prevGuesses;
+	vg prevGuesses;
 	// std::vector<unsigned> prevScores;
 
 	int *currentGuesses;
 	
-
 	int round = 0;
 	// do {
 		// =======================================================================
@@ -50,9 +49,11 @@ int main( int argc, char **argv) {
 				// combis = product(range(COLORS), repeat=SPOTS)
 
 				for (int i = 0; i < 5; i++){
+					std::vector<unsigned> lol;
 					for (int j = 0; j < SPOTS; j++){
-						prevGuesses.push_back(i*SPOTS + j);
+						lol.push_back(j);
 					}
+					prevGuesses.push_back(lol);
 				}
 			}
 
@@ -78,8 +79,8 @@ int main( int argc, char **argv) {
 			// ====== choose randomly a guess and assess it 
 			// int rand_i = rand() % NB_NODES; 
 			// while (currentGuesses.get(i) == null) { 
-				// rand_i = rand() % NB_NODES; 
-			// }		
+			// 	rand_i = rand() % NB_NODES; 
+			// }
 
 			// ======  assess the guess :
 			// unsigned* evaluation = gameMaster.checkProposedSol(currentGuesses.get(i))
@@ -109,7 +110,8 @@ int main( int argc, char **argv) {
 			// todo : replace it by combinations 
 			std::vector<unsigned> newGuess;
 			for (int i=0; i<SPOTS; i++) {
-				newGuess.push_back(ID);
+				if (ID == 2) {newGuess.push_back(NULL);} // NULL is 0 in c++
+				else {newGuess.push_back(ID);}
 			}
 			
 			// GATHER
@@ -135,33 +137,40 @@ int main( int argc, char **argv) {
 	return 0;
 }
 
-
-
-void broadcastSend(std::vector<unsigned> vec){
+void broadcastSend(vg vec){
 	int vecSize = vec.size();
-	MPI_Bcast(&vecSize, 1, MPI_INT , MASTER, MPI_COMM_WORLD);
-	MPI_Bcast(&vec[0], vecSize, MPI_INT , MASTER, MPI_COMM_WORLD);
+	MPI_Bcast(&vecSize, 1, MPI_INT , 0, MPI_COMM_WORLD);
+	for (int i = 0; i < vecSize; i++){
+		MPI_Bcast(&vec[i][0], SPOTS, MPI_INT , 0, MPI_COMM_WORLD);
+	}
 }
 
-std::vector<unsigned> broadcastRecvVecOfVec(){
-	std::vector<unsigned> vec;
+
+vg broadcastRecvVecOfVec(){
+	vg vec;
 	int vecSize;
-	MPI_Bcast(&vecSize, 1, MPI_INT , MASTER, MPI_COMM_WORLD);
+	MPI_Bcast(&vecSize, 1, MPI_INT , 0, MPI_COMM_WORLD);
 	vec.resize(vecSize);
-	MPI_Bcast(&vec[0], vecSize, MPI_INT , MASTER, MPI_COMM_WORLD);
+	for (int i = 0; i < vecSize; i++){
+		vec[i].resize(SPOTS);
+		MPI_Bcast(&vec[i][0], SPOTS, MPI_INT , 0, MPI_COMM_WORLD);
+	}
 	return vec;
 }
 
-void print(std::vector<unsigned> vec){
-	cout << "[";
+
+void print(vg vec){
+	cout << "{";
 	for (int i = 0; i < vec.size(); i++){
-		if (i % SPOTS == 0){
-			cout << "[";
+		cout << "[";
+		for (int j = 0; j < vec[i].size(); j++){
+			cout << vec[i][j];
+			if (j != vec[i].size()-1)
+				cout << ", ";
 		}
-		cout << vec[i] << ",";
-		if (i % SPOTS == SPOTS-1){
-			cout << "],";
-		}
+		cout << "]";
+		if (i != vec.size()-1)
+			cout << ", ";
 	}
-	cout << "]" << endl;
+	cout << "}" << endl;
 }
