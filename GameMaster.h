@@ -29,7 +29,7 @@ public:
     GameMaster(unsigned colors, unsigned positions);
 
     // returns an array of length 2: 0 -> # perfect colors, 1 -> # correct colors
-    unsigned* checkProposedSol(unsigned* proposedSolution);
+    sg checkProposedSol(sg* proposedSolution);
 
 	// bool victory(std::vector<unsigned>);
 
