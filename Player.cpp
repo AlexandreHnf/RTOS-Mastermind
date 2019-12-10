@@ -48,10 +48,10 @@ bool Player::proposalRespectsKnowledge(sg proposal, nat proposalLen, sg referenc
     nat wrongColors = reference.size() - correctColors;
 
     //if (conservedColors < correctColors && correctColors == this->positions) return false;
-    if (changedColors > wrongColors && wrongColors == 0) return false;
+    if (changedColors > wrongColors) return false;
 
     //if (conservedColors <= correctColors && correctColors != this->positions) return false;
-    if (changedColors >= wrongColors && wrongColors != 0) return false;
+    //if (changedColors > wrongColors && wrongColors != 0) return false;
 
     //if (conservedColors == this->positions && correctColors == 0) return false;
     if (changedColors == 0 && wrongColors == reference.size()) return false;

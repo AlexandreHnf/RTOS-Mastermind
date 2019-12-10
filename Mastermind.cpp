@@ -6,30 +6,23 @@
 #include <cstdlib>
 #include "Mastermind.h"
 
+#define TRUE 1
+#define FALSE 0
+
 using namespace std;
 
-
-/*
-link number of colors, nb of nodes, & nb of fixed spots
-do while
-link guesses 
-report
-*/
-
-int TRUE = 1;
-int FALSE = 0;
 int COLORS;
 int SPOTS;
 int EVALS = 2; // black pins and white pins
 int NB_FIXED_SPOTS;
-int NB_COMBIS;
-int MASTER = 0;
-int NONE = 0;
+int MASTER_ID = 0;
+
 GameMaster gameMaster;
 Player player;
 
 int main( int argc, char **argv) {
 
+	//========= MPI ===============
 	int ID; // process ID
 	int NB_NODES; // nb of instances
 
@@ -39,165 +32,126 @@ int main( int argc, char **argv) {
 	MPI_Comm_size( MPI_COMM_WORLD, &NB_NODES ); // nb of instances
 
 	//======= Read arguments =========
-	COLORS = 10;
-	SPOTS = 4;
+	COLORS = NB_NODES-1;
+	SPOTS = COLORS/2;
 	NB_FIXED_SPOTS = 1;
-	NB_COMBIS = COLORS*SPOTS;
-	if (argc == 3){
-		COLORS = atoi(argv[1]);
-		SPOTS  = atoi(argv[2]);
+	if (argc == 2){
+		SPOTS = atoi(argv[1]);
 	}
 
-	int finished = FALSE;
+	// ======= Init variables ========
 	vg prevGuesses;
 	vg prevScores;
-
 	int *currentGuesses;
-	
 	int round = 0;
+	int finished = FALSE;
+
 	do {
-		// cout << "Start of Round n°" << round << " for node n°" << ID << endl;
-		if (ID == MASTER) {
-			// cout << " =========== MASTER ===========" << endl;
+		// =======================================================================
+		// ============================== MASTER =================================
+		// =======================================================================
+		if (ID == MASTER_ID) {
+	
 			if (round == 0) {
-				// ==== INITIALISATION FOR THE MASTER ====
+				// ==== INITIALISATION FOR THE MASTER_ID ====
+				cout << pow(COLORS, SPOTS) << " possible guesses" << endl;
 				gameMaster = GameMaster(COLORS, SPOTS);
 				gameMaster.printSolution();
-
-				// just to test prev guesses list 
-				// for (int i = 0; i < 5; i++){
-				// 	std::vector<unsigned> guess;
-				// 	std::vector<unsigned> score;
-				// 	for (int j = 0; j < SPOTS; j++) { guess.push_back(j); }					
-				// 	for (int k = 0; k < EVALS; k++) { score.push_back(k); }
-				// 	prevGuesses.push_back(guess);
-				// 	prevScores.push_back(score);
-				// }
 			}
-			// send to each node its corresponding fixed begin
+			
+			// ====== send to each node its corresponding fixed beginning 
 			vg fixedSpots = gameMaster.generateFirstPositions(NB_FIXED_SPOTS);
-
 			sendFixedSpots(fixedSpots);
 			
 			// ====== send prev guesses and prev scores to all nodes
 			broadcastSendVecVec(prevGuesses, SPOTS); 
 			broadcastSendVecVec(prevScores, EVALS);
-			// cout << "The master have sent prev guesses to all nodes" << endl;
-
 
 			// ====== receive the guesses from all nodes
-			vg newGuesses; // list of guesses
-			for (int i = 1; i < NB_NODES; i++){
+			vg newGuesses; // vector of guesses
+			for (int i = 1; i < NB_NODES; i++){ // for each slave (every node besides 0)
 				std::vector<unsigned> guess;
 				guess.resize(SPOTS);
 				MPI_Recv(&guess[0], SPOTS, MPI_INT, i, 0, MPI_COMM_WORLD, &status);
 				newGuesses.push_back(guess);
-				// cout << "after master recv guess " << endl;
-				// for (int j = 0; j < SPOTS; j++){ cout << guess.at(j) << " ";}
-				// cout << endl;
 			}	
 
-			cout << "new guesses received :";
-			print(newGuesses);
+			// cout << "new guesses received :"; print(newGuesses);
 
 			// ====== choose randomly a guess and assess it 
 			int rand_i = rand() % (NB_NODES-1); 
-			while (newGuesses.at(rand_i).at(0) == COLORS) {  // it means that no plausible sol found
+			while (newGuesses.at(rand_i).at(0) == COLORS) {  //it means that no plausible sol found
 				rand_i = rand() % (NB_NODES-1); // we search again for a random guess
 			}
 			std::vector<unsigned> chosenGuess = newGuesses.at(rand_i);
 
+			// cout << "chosen guess : "; print(chosenGuess); cout << endl;
 
-			cout << "chosen guess : ";
-			print(chosenGuess);
-			cout << endl;
-
-			// ======  assess the guess :
+			// ======  assess the randomly chosen guess :
 			std::vector<unsigned> evaluation = gameMaster.checkProposedSol(chosenGuess);
-			cout << "evaluation : ";
-			print(evaluation);
-			cout << endl;
+			
+			// cout << "evaluation : "; print(evaluation); cout << endl;
 
 			// ====== update the previous guesses list and the scores list
 			prevGuesses.push_back(chosenGuess);
 			prevScores.push_back(evaluation);
 
-			cout << "previous guesses : ";
-			print(prevGuesses);
-			cout << "previous scores : ";
-			print(prevScores);
+			// cout << "previous guesses : "; print(prevGuesses);
+			// cout << "previous scores : ";  print(prevScores);
 
-
-			// if victory => finish all 
-			// finished = gameMaster.victory(chosenGuess);
-			// finished = victory(chosenGuess);
-			finished = evaluation.at(0) == SPOTS;
-			cout << "finished ? " << finished << endl;
-
-			// send the finished value 
-			MPI_Bcast(&finished, 1, MPI_INT , MASTER, MPI_COMM_WORLD);
+			// ======= send the finished value (whether we won or not) to each node
+			finished = evaluation.at(0) == SPOTS; // (4, 0)
+			// cout << "finished ? " << finished << endl; 
+			MPI_Bcast(&finished, 1, MPI_INT , MASTER_ID, MPI_COMM_WORLD);
 
 			MPI_Barrier(MPI_COMM_WORLD); // when Master allow other nodes to continue
 		} 
 		
 
-
 		// =======================================================================
 		// ============================ CHALLENGER ===============================
 		// =======================================================================
 		else { 
-			//cout << "======= SLAVE n°" << ID  << " =======" << endl;
-
 			player = Player(COLORS, SPOTS); // object player for each node
 			
 			// receives the fixed Spots 
 			std::vector<unsigned> fixedSpot = recvFixedSpots(status);
-			//print(fixedSpot);
 
 			// receives the prev guesses list and prev scores list
 			prevGuesses = broadcastRecvVecOfVec(SPOTS);
 			prevScores = broadcastRecvVecOfVec(EVALS);
-			// print(prevGuesses);
-			// print(prevScores); 
 			
-			// compute all combiunsignedions and pick one plausible guess
-			// todo : replace it by combinations 
+			// computes all combinations and pick one plausible guess
 			std::vector<unsigned> newGuess;
-			// for (int i=0; i < SPOTS; i++) {
-			// 	if (ID == 2) {newGuess.push_back(COLORS);} // NULL is 0 in c++
-			// 	else {newGuess.push_back(ID);}
-			// }
-
 			newGuess = player.generatePlausibleSolution(fixedSpot, &prevGuesses, &prevScores);
-			cout << "r" << round << "new guess of n " << ID << ": ";
-			print(newGuess);
-			cout << endl;
+			
+			// cout << "r" << round << " | new guess of n " << ID << ": "; print(newGuess); cout << endl;
 
-			// GATHER
-			MPI_Send(&newGuess[0], SPOTS, MPI_INT, MASTER, 0, MPI_COMM_WORLD); // send his guess to the master 
-			//cout << "process " << ID << " sent his guess to master !" << endl;
+			// sends his guess to the master
+			MPI_Send(&newGuess[0], SPOTS, MPI_INT, MASTER_ID, 0, MPI_COMM_WORLD); 
 
 			// receives the finished value 
-			MPI_Bcast(&finished, 1, MPI_INT ,MASTER, MPI_COMM_WORLD);
-			if (finished == TRUE) {cout << "node " << ID << " finished" << endl;}
+			MPI_Bcast(&finished, 1, MPI_INT ,MASTER_ID, MPI_COMM_WORLD);
+			// if (finished == TRUE) {cout << "node " << ID << " finished" << endl;}
 
+			// waits for the master to finish assessing the guess
 			MPI_Barrier(MPI_COMM_WORLD);
 
 		}
-
-		// cout << "End of Round n°" << round << " for node n°" << ID << endl;
+		
 		round++;
 
 	} while (finished == FALSE);
 
 
 	// THE LOOP IS FINISHED 
-	if (ID == MASTER){
-
-		cout << "Solution found." << endl;
+	if (ID == MASTER_ID){
+		cout << " ======== Solution found : "; 
+		print(prevGuesses.at(prevGuesses.size()-1)); 
+		cout << endl;
 	}
 
-	cout << "GOODBYE process " << ID << endl;
+	// cout << "GOODBYE from node " << ID << endl;
 
 	MPI_Finalize();
 	return 0;
@@ -224,21 +178,21 @@ std::vector<unsigned> recvFixedSpots(MPI_Status status){
 	// recv (0, 0)
 	std::vector<unsigned> fixedSpots;
 	fixedSpots.resize(NB_FIXED_SPOTS);
-	MPI_Recv(&fixedSpots[0], NB_FIXED_SPOTS, MPI_INT, MASTER, 0, MPI_COMM_WORLD, &status);
+	MPI_Recv(&fixedSpots[0], NB_FIXED_SPOTS, MPI_INT, MASTER_ID, 0, MPI_COMM_WORLD, &status);
 	return fixedSpots;
 }
 
 void broadcastSend(std::vector<unsigned> vec){
 	int vecSize = vec.size();
-	MPI_Bcast(&vecSize, 1, MPI_INT , MASTER, MPI_COMM_WORLD);
-	MPI_Bcast(&vec[0], vecSize, MPI_INT , MASTER, MPI_COMM_WORLD);
+	MPI_Bcast(&vecSize, 1, MPI_INT , MASTER_ID, MPI_COMM_WORLD);
+	MPI_Bcast(&vec[0], vecSize, MPI_INT , MASTER_ID, MPI_COMM_WORLD);
 }
 
 void broadcastSendVecVec(vg vec, int subListSize){
 	int vecSize = vec.size();
-	MPI_Bcast(&vecSize, 1, MPI_INT , MASTER, MPI_COMM_WORLD);
+	MPI_Bcast(&vecSize, 1, MPI_INT , MASTER_ID, MPI_COMM_WORLD);
 	for (int i = 0; i < vecSize; i++){
-		MPI_Bcast(&vec[i][0], subListSize, MPI_INT , MASTER, MPI_COMM_WORLD);
+		MPI_Bcast(&vec[i][0], subListSize, MPI_INT , MASTER_ID, MPI_COMM_WORLD);
 	}
 }
 
