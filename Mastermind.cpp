@@ -56,7 +56,7 @@ int main( int argc, char **argv) {
 	
 	int round = 0;
 	do {
-		cout << "Start of Round n°" << round << " for node n°" << ID << endl;
+		// cout << "Start of Round n°" << round << " for node n°" << ID << endl;
 		if (ID == MASTER) {
 			// cout << " =========== MASTER ===========" << endl;
 			if (round == 0) {
@@ -65,14 +65,14 @@ int main( int argc, char **argv) {
 				gameMaster.printSolution();
 
 				// just to test prev guesses list 
-				for (int i = 0; i < 5; i++){
-					std::vector<unsigned> guess;
-					std::vector<unsigned> score;
-					for (int j = 0; j < SPOTS; j++) { guess.push_back(j); }					
-					for (int k = 0; k < EVALS; k++) { score.push_back(k); }
-					prevGuesses.push_back(guess);
-					prevScores.push_back(score);
-				}
+				// for (int i = 0; i < 5; i++){
+				// 	std::vector<unsigned> guess;
+				// 	std::vector<unsigned> score;
+				// 	for (int j = 0; j < SPOTS; j++) { guess.push_back(j); }					
+				// 	for (int k = 0; k < EVALS; k++) { score.push_back(k); }
+				// 	prevGuesses.push_back(guess);
+				// 	prevScores.push_back(score);
+				// }
 			}
 			// send to each node its corresponding fixed begin
 			vg fixedSpots = gameMaster.generateFirstPositions(NB_FIXED_SPOTS);
@@ -86,7 +86,7 @@ int main( int argc, char **argv) {
 
 
 			// ====== receive the guesses from all nodes
-			std::vector<std::vector<unsigned>> newGuesses; // list of guesses
+			vg newGuesses; // list of guesses
 			for (int i = 1; i < NB_NODES; i++){
 				std::vector<unsigned> guess;
 				guess.resize(SPOTS);
@@ -96,7 +96,9 @@ int main( int argc, char **argv) {
 				// for (int j = 0; j < SPOTS; j++){ cout << guess.at(j) << " ";}
 				// cout << endl;
 			}	
-			
+
+			cout << "new guesses received :";
+			print(newGuesses);
 
 			// ====== choose randomly a guess and assess it 
 			int rand_i = rand() % (NB_NODES-1); 
@@ -111,7 +113,7 @@ int main( int argc, char **argv) {
 			cout << endl;
 
 			// ======  assess the guess :
-			std::vector<unsigned> evaluation = gameMaster.checkProposedSol(&chosenGuess);
+			std::vector<unsigned> evaluation = gameMaster.checkProposedSol(chosenGuess);
 			cout << "evaluation : ";
 			print(evaluation);
 			cout << endl;
@@ -120,18 +122,22 @@ int main( int argc, char **argv) {
 			prevGuesses.push_back(chosenGuess);
 			prevScores.push_back(evaluation);
 
+			cout << "previous guesses : ";
 			print(prevGuesses);
+			cout << "previous scores : ";
+			print(prevScores);
+
 
 			// if victory => finish all 
 			// finished = gameMaster.victory(chosenGuess);
 			// finished = victory(chosenGuess);
 			finished = evaluation.at(0) == SPOTS;
-			// cout << "finished ? " << finished << endl;
-
-			MPI_Barrier(MPI_COMM_WORLD); // when Master allow other nodes to continue
+			cout << "finished ? " << finished << endl;
 
 			// send the finished value 
-			// MPI_Bcast(&finished, 1, MPI_INT , MASTER, MPI_COMM_WORLD);
+			MPI_Bcast(&finished, 1, MPI_INT , MASTER, MPI_COMM_WORLD);
+
+			MPI_Barrier(MPI_COMM_WORLD); // when Master allow other nodes to continue
 		} 
 		
 
@@ -163,18 +169,19 @@ int main( int argc, char **argv) {
 			// }
 
 			newGuess = player.generatePlausibleSolution(fixedSpot, &prevGuesses, &prevScores);
-			cout << "new guess of player " << ID << ": ";
-			// print(newGuess);
+			cout << "r" << round << "new guess of n " << ID << ": ";
+			print(newGuess);
+			cout << endl;
 
 			// GATHER
 			MPI_Send(&newGuess[0], SPOTS, MPI_INT, MASTER, 0, MPI_COMM_WORLD); // send his guess to the master 
 			//cout << "process " << ID << " sent his guess to master !" << endl;
 
-			MPI_Barrier(MPI_COMM_WORLD);
-
 			// receives the finished value 
-			// MPI_Bcast(&finished, 1, MPI_INT ,MASTER, MPI_COMM_WORLD);
-			// if (finished == TRUE) {cout << "node " << ID << " finished" << endl;}
+			MPI_Bcast(&finished, 1, MPI_INT ,MASTER, MPI_COMM_WORLD);
+			if (finished == TRUE) {cout << "node " << ID << " finished" << endl;}
+
+			MPI_Barrier(MPI_COMM_WORLD);
 
 		}
 

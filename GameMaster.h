@@ -1,7 +1,3 @@
-//
-// Created by Madalin Ionescu on 2019-12-07.
-//
-
 #ifndef RTOS_MASTERMIND_GAMEMASTER_H
 #define RTOS_MASTERMIND_GAMEMASTER_H
 
@@ -29,7 +25,7 @@ public:
     GameMaster(unsigned colors, unsigned positions);
 
     // returns an array of length 2: 0 -> # perfect colors, 1 -> # correct colors
-    sg checkProposedSol(sg* proposedSolution);
+    sg checkProposedSol(sg proposedSolution);
 
 	// bool victory(std::vector<unsigned>);
 

@@ -11,22 +11,22 @@ GameMaster::GameMaster(unsigned colors, unsigned positions) {
         solution[i] = random() % this->colors;
 }
 
-sg GameMaster::checkProposedSol(sg* proposedSolution) {
+sg GameMaster::checkProposedSol(sg proposedSolution) {
     sg res; // 0 -> perfect; 1 -> correct color
     res.resize(2); res[0] = 0; res[1] = 0;
     unsigned* solution = new unsigned[this->positions];
 
-    for (unsigned i = 0; i < proposedSolution->size(); i++)
-        if (proposedSolution->at(i) == this->solution[i]) {
+    for (unsigned i = 0; i < proposedSolution.size(); i++)
+        if (proposedSolution.at(i) == this->solution[i]) {
             res[0]++;
-            proposedSolution->at(i) = this->colors;
+            proposedSolution.at(i) = this->colors;
             solution[i] = this->colors;
         } else solution[i] = this->solution[i];
 
     for (unsigned i = 0; i < this->positions; i++)
-        if (proposedSolution->at(i) != this->colors)
+        if (proposedSolution.at(i) != this->colors)
             for (unsigned j = 0; j < this->positions; j++)
-                if (proposedSolution->at(i) == solution[j]) {
+                if (proposedSolution.at(i) == solution[j]) {
                     res[1]++;
                     solution[j] = this->colors;
                     break;
