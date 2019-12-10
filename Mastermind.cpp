@@ -112,7 +112,11 @@ int main( int argc, char **argv) {
 			cout << endl;
 
 			// ======  assess the guess :
-			// std::vector<unsigned> evaluation = gameMaster.checkProposedSol(chosenGuess);
+			// std::vector<unsigned> evaluation = gameMaster.checkProposedSol(&chosenGuess);
+			// cout << "evaluation : ";
+			// cout << evaluation.size();
+			// // print(evaluation);
+			// cout << endl;
 
 			// ====== update the previous guesses list and the scores list
 			// prevGuesses.push_back(chosenGuess);
@@ -154,13 +158,13 @@ int main( int argc, char **argv) {
 			// compute all combiunsignedions and pick one plausible guess
 			// todo : replace it by combinations 
 			std::vector<unsigned> newGuess;
-			// for (int i=0; i < SPOTS; i++) {
-			// 	if (ID == 2) {newGuess.push_back(COLORS);} // NULL is 0 in c++
-			// 	else {newGuess.push_back(ID);}
-			// }
+			for (int i=0; i < SPOTS; i++) {
+				if (ID == 2) {newGuess.push_back(COLORS);} // NULL is 0 in c++
+				else {newGuess.push_back(ID);}
+			}
 
-			newGuess = player.generatePlausibleSolution(fixedSpot, &prevGuesses, &prevScores);
-			cout << "new guess of player " << ID << ": ";
+			// newGuess = player.generatePlausibleSolution(fixedSpot, &prevGuesses, &prevScores);
+			// cout << "new guess of player " << ID << ": ";
 			print(newGuess);
 
 			// GATHER
