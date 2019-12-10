@@ -3,6 +3,7 @@
 #include "Game.h"
 #include <vector>
 #include <iostream>
+#include <chrono>
 #include <cstdlib>
 #include "Mastermind.h"
 
@@ -40,6 +41,7 @@ int main( int argc, char **argv) {
 	}
 
 	// ======= Init variables ========
+	std::chrono::time_point<std::chrono::system_clock> startTime;
 	vg prevGuesses;
 	vg prevScores;
 	int *currentGuesses;
@@ -54,6 +56,8 @@ int main( int argc, char **argv) {
 	
 			if (round == 0) {
 				// ==== INITIALISATION FOR THE MASTER_ID ====
+				startTime = std::chrono::system_clock::now();
+
 				cout << pow(COLORS, SPOTS) << " possible guesses" << endl;
 				gameMaster = GameMaster(COLORS, SPOTS);
 				gameMaster.printSolution();
@@ -149,6 +153,9 @@ int main( int argc, char **argv) {
 		cout << " ======== Solution found : "; 
 		print(prevGuesses.at(prevGuesses.size()-1)); 
 		cout << endl;
+		auto now = std::chrono::system_clock::now();
+		auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(now - startTime); 
+		cout << "Time : " << elapsedTime.count()/1000.0 << "s" << endl;
 	}
 
 	// cout << "GOODBYE from node " << ID << endl;
