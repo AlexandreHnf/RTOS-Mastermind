@@ -13,7 +13,7 @@ GameMaster::GameMaster(unsigned colors, unsigned positions) {
 
 sg GameMaster::checkProposedSol(sg* proposedSolution) {
     sg res; // 0 -> perfect; 1 -> correct color
-    res.reserve(2); res[0] = 0; res[1] = 0;
+    res.resize(2); res[0] = 0; res[1] = 0;
     unsigned* solution = new unsigned[this->positions];
 
     for (unsigned i = 0; i < proposedSolution->size(); i++)
@@ -31,7 +31,6 @@ sg GameMaster::checkProposedSol(sg* proposedSolution) {
                     solution[j] = this->colors;
                     break;
                 }
-
     return res;
 }
 
