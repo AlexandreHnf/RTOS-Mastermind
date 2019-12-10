@@ -65,10 +65,11 @@ bool Player::proposalRespectsKnowledge(sg proposal, nat proposalLen, sg referenc
 
 sg Player::generatePlausibleSolution(sg posList, const vg* previousGuesses, const vg* previousEvaluations) {
     sg proposal;
-    proposal.reserve(this->positions);
 
     for (nat i = 0; i < posList.size(); i++)
-        proposal[i] = posList[i];
+        proposal.push_back(posList[i]);
+    for (nat i = posList.size(); i < this->positions; i++)
+        proposal.push_back(this->colors);
 
     bool found = false;
     generatePosition(&proposal, posList.size(), previousGuesses, previousEvaluations, &found);
