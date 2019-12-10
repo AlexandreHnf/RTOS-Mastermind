@@ -1,7 +1,3 @@
-//
-// Created by Madalin Ionescu on 2019-12-07.
-//
-
 #include "GameMaster.h"
 
 GameMaster::GameMaster(unsigned colors, unsigned positions) {
@@ -52,15 +48,23 @@ unsigned* GameMaster::getSolution() const {
     return solution;
 }
 
+// bool GameMaster::victory(std::vector<unsigned> guess) {
+// 	for (int i = 0; i < this->positions; i++) {
+// 		if (guess.at(i) != this->solution.at(i)) {
+// 			return false;
+// 		}
+// 	}
+// 	return true;
+// }
+
 vg GameMaster::generateFirstPositions(unsigned short posNb) {
     sg working;
     vg beginnings;
-    int colors = 4;
 
     for (int i = 0; i < posNb; i++)
         working.push_back(0);
 
-    cartProduct(&working, &beginnings, 0, posNb, colors);
+    cartProduct(&working, &beginnings, 0, posNb, this->colors);
 
     return beginnings;
 }
