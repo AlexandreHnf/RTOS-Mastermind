@@ -41,7 +41,7 @@ int main( int argc, char **argv) {
 	}
 
 	// ======= Init variables ========
-	std::chrono::time_point<std::chrono::system_clock> startTime;
+	chrono::time_point<std::chrono::system_clock> startTime;
 	vg prevGuesses;
 	vg prevScores;
 	int *currentGuesses;
@@ -80,8 +80,6 @@ int main( int argc, char **argv) {
 				newGuesses.push_back(guess);
 			}	
 
-			// cout << "new guesses received :"; print(newGuesses);
-
 			// ====== choose randomly a guess and assess it 
 			int rand_i = rand() % (NB_NODES-1); 
 			while (newGuesses.at(rand_i).at(0) == COLORS) {  //it means that no plausible sol found
@@ -89,26 +87,18 @@ int main( int argc, char **argv) {
 			}
 			std::vector<unsigned> chosenGuess = newGuesses.at(rand_i);
 
-			// cout << "chosen guess : "; print(chosenGuess); cout << endl;
-
 			// ======  assess the randomly chosen guess :
 			std::vector<unsigned> evaluation = gameMaster.checkProposedSol(chosenGuess);
-			
-			// cout << "evaluation : "; print(evaluation); cout << endl;
 
 			// ====== update the previous guesses list and the scores list
 			prevGuesses.push_back(chosenGuess);
 			prevScores.push_back(evaluation);
 
-			// cout << "previous guesses : "; print(prevGuesses);
-			// cout << "previous scores : ";  print(prevScores);
-
 			// ======= send the finished value (whether we won or not) to each node
 			finished = evaluation.at(0) == SPOTS; // (4, 0)
-			// cout << "finished ? " << finished << endl; 
 			MPI_Bcast(&finished, 1, MPI_INT , MASTER_ID, MPI_COMM_WORLD);
 
-			MPI_Barrier(MPI_COMM_WORLD); // when Master allow other nodes to continue
+			// MPI_Barrier(MPI_COMM_WORLD); // when Master allow other nodes to continue
 		} 
 		
 
@@ -128,18 +118,15 @@ int main( int argc, char **argv) {
 			// computes all combinations and pick one plausible guess
 			std::vector<unsigned> newGuess;
 			newGuess = player.generatePlausibleSolution(fixedSpot, &prevGuesses, &prevScores);
-			
-			// cout << "r" << round << " | new guess of n " << ID << ": "; print(newGuess); cout << endl;
 
 			// sends his guess to the master
 			MPI_Send(&newGuess[0], SPOTS, MPI_INT, MASTER_ID, 0, MPI_COMM_WORLD); 
 
 			// receives the finished value 
 			MPI_Bcast(&finished, 1, MPI_INT ,MASTER_ID, MPI_COMM_WORLD);
-			// if (finished == TRUE) {cout << "node " << ID << " finished" << endl;}
 
 			// waits for the master to finish assessing the guess
-			MPI_Barrier(MPI_COMM_WORLD);
+			// MPI_Barrier(MPI_COMM_WORLD);
 
 		}
 		
@@ -153,8 +140,8 @@ int main( int argc, char **argv) {
 		cout << " ======== Solution found : "; 
 		print(prevGuesses.at(prevGuesses.size()-1)); 
 		cout << endl;
-		auto now = std::chrono::system_clock::now();
-		auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(now - startTime); 
+		auto now = chrono::system_clock::now();
+		auto elapsedTime = chrono::duration_cast<chrono::milliseconds>(now - startTime); 
 		cout << "Time : " << elapsedTime.count()/1000.0 << "s" << endl;
 	}
 
