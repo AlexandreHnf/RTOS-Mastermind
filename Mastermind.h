@@ -16,7 +16,7 @@ std::vector<unsigned> broadcastRecv();
 void sendFixedSpots(vg);
 std::vector<unsigned> recvFixedSpots(MPI_Status);
 
-bool victory(std::vector<unsigned>);
+int victory(std::vector<unsigned>);
 
 void print(vg);
 void print(std::vector<unsigned>);

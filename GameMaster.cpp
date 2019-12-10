@@ -60,12 +60,11 @@ unsigned* GameMaster::getSolution() const {
 vg GameMaster::generateFirstPositions(unsigned short posNb) {
     sg working;
     vg beginnings;
-    int colors = 4;
 
     for (int i = 0; i < posNb; i++)
         working.push_back(0);
 
-    cartProduct(&working, &beginnings, 0, posNb, colors);
+    cartProduct(&working, &beginnings, 0, posNb, this->colors);
 
     return beginnings;
 }
