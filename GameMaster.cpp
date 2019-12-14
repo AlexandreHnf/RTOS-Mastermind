@@ -12,7 +12,7 @@ GameMaster::GameMaster(unsigned colors, unsigned positions) {
 }
 
 sg GameMaster::checkProposedSol(sg proposedSolution) {
-    sg res; // 0 -> perfect; 1 -> correct color
+    sg res; // 0 -> perfect matches; 1 -> correct colors
     res.resize(2); res[0] = 0; res[1] = 0;
     unsigned* solution = new unsigned[this->positions];
 
@@ -46,15 +46,6 @@ void GameMaster::printSolution() {
 unsigned* GameMaster::getSolution() const {
     return solution;
 }
-
-// bool GameMaster::victory(std::vector<unsigned> guess) {
-// 	for (int i = 0; i < this->positions; i++) {
-// 		if (guess.at(i) != this->solution.at(i)) {
-// 			return false;
-// 		}
-// 	}
-// 	return true;
-// }
 
 vg GameMaster::generateFirstPositions(unsigned short posNb) {
     sg working;
