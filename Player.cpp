@@ -25,7 +25,8 @@ bool Player::proposalIsDifferent(sg proposal, nat proposalLen, sg reference) con
 }
 
 bool Player::proposalRespectsKnowledge(sg proposal, nat proposalLen, sg reference, sg referenceScore) const {
-    bool* referenceNotTaken = new bool[reference.size()];
+    bool* referenceNotTaken = new bool[reference.size()];   
+    //true if the position in reference was not already matched to one in the proposal, false otherwise
     for (nat i = 0; i < reference.size(); i++)
         referenceNotTaken[i] = true;
 
@@ -34,7 +35,8 @@ bool Player::proposalRespectsKnowledge(sg proposal, nat proposalLen, sg referenc
     for (nat i = 0; i < proposalLen; i++) {
         for (nat j = 0; j < reference.size(); j++) {
             if (proposal[i] == reference[j] && referenceNotTaken[j]) {
-                referenceNotTaken[j] = false;
+                //do not match the same position in reference twice
+                referenceNotTaken[j] = false;   //mark the position in reference
                 conservedColors++;
                 break;
             }
@@ -62,15 +64,18 @@ bool Player::proposalRespectsKnowledge(sg proposal, nat proposalLen, sg referenc
 sg Player::generatePlausibleSolution(sg posList, const vg* previousGuesses, const vg* previousEvaluations) {
     sg proposal;
 
+    //set the prefix
     for (nat i = 0; i < posList.size(); i++)
         proposal.push_back(posList[i]);
+    //create the other positions - reserve method fails
     for (nat i = posList.size(); i < this->positions; i++)
         proposal.push_back(this->colors);
 
     bool found = false;
+    //start filling the positions following the fixed prefix 
     generatePosition(&proposal, posList.size(), previousGuesses, previousEvaluations, &found);
 
-    if (!found)
+    if (!found) //solution not found: replace every position with a marker value indicating that
         for (nat i = 0; i < this->positions; i++)
             proposal[i] = this->colors;
 
@@ -78,13 +83,17 @@ sg Player::generatePlausibleSolution(sg posList, const vg* previousGuesses, cons
 }
 
 void Player::generatePosition(sg* proposal, nat position, const vg* previousGuesses, const vg* previousEvaluations, bool* found) {
+    //recursive backtracking function
     if (!*found && plausibleSolution(previousGuesses, previousEvaluations, *proposal, position)) {
+        //stop when the solution is found
         for (nat i = 0; i < this->colors; i++) {
             if (!*found) {
+                //do not modify anything after the solution was found
                 proposal->at(position) = i;
                 if (position == proposal->size() - 1) {
-                    // check if the solution is viable here
+                    //all the positions filled: check if the solution is viable
                     if (plausibleSolution(previousGuesses, previousEvaluations, *proposal, position + 1)) {
+                        //accept the solution and stop the recursion
                         *found = true;
                     }
                 } else generatePosition(proposal, position + 1, previousGuesses, previousEvaluations, found);
