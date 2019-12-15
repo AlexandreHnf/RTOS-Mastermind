@@ -5,7 +5,6 @@
 #PBS -N Mastermind
 #PBS -o mastermind_out.txt
 
-rm mastermind_out.txt
 echo "Running job..."
 
 module load OpenMPI/3.1.4-GCC-8.3.0
@@ -14,6 +13,6 @@ cd $HOME
 
 mpiCC *.cpp *.h -o mastermind -std=c++11
 
-mpirun -np 11 mastermind 6
+mpirun -np 7 mastermind 4
 
 echo "Done"

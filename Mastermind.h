@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "mpi.h"
-#include "Game.h"
+#include "Player.h"
+#include "GameMaster.h"
 #include <vector>
 #include <math.h>
 #include <iostream>
